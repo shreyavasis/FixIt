@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct FixItLocalApp: App {
@@ -13,5 +14,6 @@ struct FixItLocalApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: Report.self)
     }
 }
