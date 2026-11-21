@@ -10,9 +10,28 @@
 		992B04B8308D28F100F9968D /* FixItLocal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FixItLocal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		99C0F9CF30AE8D3A001ACCEF /* Exceptions for "FixItLocal" folder in "FixItLocal" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				FixItLocal/Assets.xcassets,
+				FixItLocal/ContentView.swift,
+				FixItLocal/FixItLocalApp.swift,
+				FixItLocal/Item.swift,
+				FixItLocalTests/FixItLocalTests.swift,
+				FixItLocalUITests/FixItLocalUITests.swift,
+				FixItLocalUITests/FixItLocalUITestsLaunchTests.swift,
+			);
+			target = 992B04B7308D28F100F9968D /* FixItLocal */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		992B04BA308D28F100F9968D /* FixItLocal */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				99C0F9CF30AE8D3A001ACCEF /* Exceptions for "FixItLocal" folder in "FixItLocal" target */,
+			);
 			path = FixItLocal;
 			sourceTree = "<group>";
 		};
@@ -253,6 +272,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "FixItLocal needs your location to accurately report community issues such as potholes and broken streetlights.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -284,6 +304,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "FixItLocal needs your location to accurately report community issues such as potholes and broken streetlights.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
