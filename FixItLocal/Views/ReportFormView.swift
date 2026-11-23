@@ -1,4 +1,3 @@
-
 //
 //  ReportFormView.swift
 //  FixItLocal
@@ -40,18 +39,72 @@ struct ReportFormView: View {
             }
             Section("Location") {
 
-                if let location = locationService.location {
-                    Label(
-                        "Location captured",
-                        systemImage: "location.fill"
+                Picker("Location", selection: $viewModel.locationMode) {
+                    Text("Current Location").tag(ReportFormViewModel.LocationMode.current)
+                    Text("Type Address").tag(ReportFormViewModel.LocationMode.typed)
+                }
+                .pickerStyle(.segmented)
+
+                if viewModel.locationMode == .current {
+
+                    if let location = locationService.location {
+                        Label(
+                            "Location captured",
+                            systemImage: "location.fill"
+                        )
+                        .foregroundStyle(.green)
+
+                        Text("Latitude: \(location.coordinate.latitude)")
+                            .font(.caption)
+
+                        Text("Longitude: \(location.coordinate.longitude)")
+                            .font(.caption)
+                    }
+
+                    Button {
+                        locationService.requestLocation()
+                    } label: {
+                        Label(
+                            locationService.location == nil
+                                ? "Use Current Location"
+                                : "Update Current Location",
+                            systemImage: "location"
+                        )
+                    }
+
+                } else {
+
+                    TextField(
+                        "e.g. 1151 S Forest Ave, Tempe, AZ",
+                        text: $viewModel.typedAddress
                     )
-                    .foregroundStyle(.green)
+                    .textInputAutocapitalization(.words)
+                    .submitLabel(.search)
+                    .onSubmit {
+                        Task { await viewModel.lookUpTypedAddress() }
+                    }
 
-                    Text("Latitude: \(location.coordinate.latitude)")
-                        .font(.caption)
+                    Button {
+                        Task { await viewModel.lookUpTypedAddress() }
+                    } label: {
+                        Label("Find Address", systemImage: "magnifyingglass")
+                    }
+                    .disabled(viewModel.isLoadingAddress)
 
-                    Text("Longitude: \(location.coordinate.longitude)")
-                        .font(.caption)
+                    if let latitude = viewModel.typedLatitude,
+                       let longitude = viewModel.typedLongitude {
+                        Label(
+                            "Address found",
+                            systemImage: "mappin.circle.fill"
+                        )
+                        .foregroundStyle(.green)
+
+                        Text("Latitude: \(latitude)")
+                            .font(.caption)
+
+                        Text("Longitude: \(longitude)")
+                            .font(.caption)
+                    }
                 }
 
                 // Display address returned by Web API
@@ -62,33 +115,51 @@ struct ReportFormView: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
-
-                Button {
-                    locationService.requestLocation()
-                } label: {
-                    Label(
-                        locationService.location == nil
-                            ? "Use Current Location"
-                            : "Update Current Location",
-                        systemImage: "location"
-                    )
-                }
             }
             .task(id: locationService.location?.timestamp) {
-                if let location = locationService.location {
+                if viewModel.locationMode == .current,
+                   let location = locationService.location {
                     await viewModel.fetchAddress(
                         latitude: location.coordinate.latitude,
                         longitude: location.coordinate.longitude
                     )
                 }
             }
+            .onChange(of: viewModel.locationMode) { _, newMode in
+                // Show the address that matches the selected mode
+                viewModel.address = ""
+                viewModel.clearTypedLocation()
+
+                if newMode == .current, let location = locationService.location {
+                    Task {
+                        await viewModel.fetchAddress(
+                            latitude: location.coordinate.latitude,
+                            longitude: location.coordinate.longitude
+                        )
+                    }
+                }
+            }
+            .onChange(of: viewModel.typedAddress) {
+                // Editing the text means the old search result no longer applies
+                if viewModel.typedLatitude != nil {
+                    viewModel.clearTypedLocation()
+                    viewModel.address = ""
+                }
+            }
 
             Section {
                 Button {
+                    // Use the typed address's coordinates or the GPS location
+                    let usingTyped = viewModel.locationMode == .typed
+
                     let saved = viewModel.saveReport(
                         context: modelContext,
-                        latitude: locationService.location?.coordinate.latitude,
-                        longitude: locationService.location?.coordinate.longitude,
+                        latitude: usingTyped
+                            ? viewModel.typedLatitude
+                            : locationService.location?.coordinate.latitude,
+                        longitude: usingTyped
+                            ? viewModel.typedLongitude
+                            : locationService.location?.coordinate.longitude,
                         address: viewModel.address.isEmpty
                             ? nil
                             : viewModel.address

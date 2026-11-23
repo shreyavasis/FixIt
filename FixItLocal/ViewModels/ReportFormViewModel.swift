@@ -25,6 +25,17 @@ class ReportFormViewModel: ObservableObject {
     @Published var address = ""
     @Published var isLoadingAddress = false
 
+    // Choose between GPS location and a typed-in address
+    enum LocationMode {
+        case current
+        case typed
+    }
+
+    @Published var locationMode: LocationMode = .current
+    @Published var typedAddress = ""
+    @Published var typedLatitude: Double?
+    @Published var typedLongitude: Double?
+
     private let geocodingService = GeocodingService()
 
     @MainActor
@@ -67,6 +78,8 @@ class ReportFormViewModel: ObservableObject {
             category = ""
             description = ""
             self.address = ""
+            typedAddress = ""
+            clearTypedLocation()
 
             alertMessage = "Report submitted successfully!"
             showAlert = true
@@ -107,4 +120,43 @@ class ReportFormViewModel: ObservableObject {
         }
     }
 
+
+    /// Looks up the address the user typed and stores its coordinates.
+    @MainActor
+    func lookUpTypedAddress() async {
+
+        let query = typedAddress.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        guard !query.isEmpty else {
+            alertMessage = "Please type an address first."
+            showAlert = true
+            return
+        }
+
+        isLoadingAddress = true
+        clearTypedLocation()
+        address = ""
+
+        defer {
+            isLoadingAddress = false
+        }
+
+        do {
+            let result = try await geocodingService.searchAddress(query)
+            typedLatitude = result.latitude
+            typedLongitude = result.longitude
+            address = result.address
+        } catch {
+            alertMessage = "Couldn't find that address. Try adding the city and state."
+            showAlert = true
+            print("Address search error: \(error)")
+        }
+    }
+
+    func clearTypedLocation() {
+        typedLatitude = nil
+        typedLongitude = nil
+    }
 }
